@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" Version="1.0">
+  <edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="1.0">
+    <Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="SAPODataExample" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+      <EntityType Name="CustomerType">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="ID" Nullable="false" Type="Edm.Int32"/>
+        <Property Name="Surname" MaxLength="20" Nullable="false" Type="Edm.String"/>
+        <Property Name="GivenName" MaxLength="20" Nullable="false" Type="Edm.String"/>
+        <Property Name="ShippingAddress" Type="SAPOData.AddressType" Nullable="true"/>
+        <Property Name="BillingAddress" Type="SAPOData.AddressType" Nullable="true"/>
+        <Property Name="CompanyName" MaxLength="32" Nullable="true" Type="Edm.String"/>
+        <NavigationProperty Name="Orders" FromRole="CustomerRole" Relationship="SAPOData.CustomerType_OrderType" ToRole="OrderRole"/>
+      </EntityType>
+      <EntityType Name="OrderType">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="ID" Nullable="false" Type="Edm.Int32"/>
+        <Property Name="CustomerID" Nullable="false" Type="Edm.Int32"/>
+        <Property Name="OrderDate" Nullable="false" Precision="6" Type="Edm.DateTime"/>
+        <Property Name="FinancialCode" MaxLength="2" Nullable="true" Type="Edm.String"/>
+        <Property Name="Region" MaxLength="7" Nullable="true" Type="Edm.String"/>
+        <Property Name="SalesRepresentative" Nullable="false" Type="Edm.Int32"/>
+        <NavigationProperty Name="Customer" FromRole="OrderRole" Relationship="SAPOData.CustomerType_OrderType" ToRole="CustomerRole"/>
+        <NavigationProperty Name="OrderItems" FromRole="OrderRole" Relationship="SAPOData.OrderType_OrderItemType" ToRole="OrderItemRole"/>
+      </EntityType>
+      <EntityType Name="OrderItemType">
+        <Key>
+          <PropertyRef Name="ID"/>
+          <PropertyRef Name="LineID"/>
+        </Key>
+        <Property Name="ID" Nullable="false" Type="Edm.Int32"/>
+        <Property Name="LineID" Nullable="false" Type="Edm.Int16"/>
+        <Property Name="ProductID" Nullable="false" Type="Edm.Int32"/>
+        <Property Name="Quantity" Nullable="false" Type="Edm.Int32"/>
+        <Property Name="ShipDate" Nullable="false" Precision="6" Type="Edm.DateTime"/>
+        <NavigationProperty Name="Order" FromRole="OrderItemRole" Relationship="SAPOData.OrderType_OrderItemType" ToRole="OrderRole"/>
+        <NavigationProperty Name="Product" FromRole="OrderItemRole" Relationship="SAPOData.ProductType_OrderItemType" ToRole="ProductRole"/>
+      </EntityType>
+      <EntityType Name="ProductType">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="ID" Nullable="false" Type="Edm.Int32"/>
+        <Property Name="Name" MaxLength="15" Nullable="false" Type="Edm.String"/>
+        <Property Name="Description" MaxLength="30" Nullable="false" Type="Edm.String"/>
+        <Property Name="Size" MaxLength="18" Nullable="false" Type="Edm.String"/>
+        <Property Name="Color" MaxLength="18" Nullable="false" Type="Edm.String"/>
+        <Property Name="Quantity" Nullable="false" Type="Edm.Int32"/>
+        <Property Name="UnitPrice" Nullable="false" Precision="15" Scale="2" Type="Edm.Decimal"/>
+        <Property Name="Photo" MaxLength="2147483647" Nullable="true" Type="Edm.Binary"/>
+        <NavigationProperty Name="OrderItems" FromRole="ProductRole" Relationship="SAPOData.ProductType_OrderItemType" ToRole="OrderItemRole"/>
+      </EntityType>
+      <ComplexType Name="AddressType">
+        <Property Name="Unit" Type="Edm.Int32" Nullable="true"/>
+        <Property Name="Line1" Type="Edm.String" Nullable="true" MaxLength="128" />
+        <Property Name="Line2" Type="Edm.String" Nullable="true" MaxLength="128" />
+        <Property Name="City" Type="Edm.String" Nullable="true" MaxLength="128" />
+        <Property Name="Province" Type="Edm.String" Nullable="true" MaxLength="32" />
+        <Property Name="PostalCode" Type="Edm.String" Nullable="true" MaxLength="6" />
+      </ComplexType>
+      <Association Name="CustomerType_OrderType">
+        <End Multiplicity="*" Role="OrderRole" Type="SAPOData.OrderType"/>
+        <End Multiplicity="1" Role="CustomerRole" Type="SAPOData.CustomerType"/>
+        <ReferentialConstraint>
+          <Principal Role="CustomerRole">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="OrderRole">
+            <PropertyRef Name="CustomerID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="ProductType_OrderItemType">
+        <End Multiplicity="*" Role="OrderItemRole" Type="SAPOData.OrderItemType"/>
+        <End Multiplicity="1" Role="ProductRole" Type="SAPOData.ProductType"/>
+        <ReferentialConstraint>
+          <Principal Role="ProductRole">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="OrderItemRole">
+            <PropertyRef Name="ProductID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <Association Name="OrderType_OrderItemType">
+        <End Multiplicity="*" Role="OrderItemRole" Type="SAPOData.OrderItemType"/>
+        <End Multiplicity="1" Role="OrderRole" Type="SAPOData.OrderType">
+          <OnDelete Action="Cascade"/>
+        </End>
+        <ReferentialConstraint>
+          <Principal Role="OrderRole">
+            <PropertyRef Name="ID"/>
+          </Principal>
+          <Dependent Role="OrderItemRole">
+            <PropertyRef Name="ID"/>
+          </Dependent>
+        </ReferentialConstraint>
+      </Association>
+      <EntityContainer Name="SAPOData_Container" m:IsDefaultEntityContainer="true">
+        <EntitySet Name="Customers" EntityType="SAPOData.CustomerType"/>
+        <EntitySet Name="Orders" EntityType="SAPOData.OrderType"/>
+        <EntitySet Name="OrderItems" EntityType="SAPOData.OrderItemType"/>
+        <EntitySet Name="Products" EntityType="SAPOData.ProductType"/>
+        <AssociationSet Name="Customers_Orders" Association="SAPOData.CustomerType_OrderType">
+          <End EntitySet="Orders" Role="OrderRole"/>
+          <End EntitySet="Customers" Role="CustomerRole"/>
+        </AssociationSet>
+        <AssociationSet Name="Products_OrderItems" Association="SAPOData.ProductType_OrderItemType">
+          <End EntitySet="OrderItems" Role="OrderItemRole"/>
+          <End EntitySet="Products" Role="ProductRole"/>
+        </AssociationSet>
+        <AssociationSet Name="Orders_OrderItems" Association="SAPOData.OrderType_OrderItemType">
+          <End EntitySet="OrderItems" Role="OrderItemRole"/>
+          <End EntitySet="Orders" Role="OrderRole"/>
+        </AssociationSet>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
